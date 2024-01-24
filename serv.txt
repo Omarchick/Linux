@@ -1,0 +1,31 @@
+  GNU nano 6.2                   currentweather
+#!/usr/bin/python3
+import cgi
+import cgitb
+import requests
+import json
+
+# Включим вывод ошибок в браузере
+cgitb.enable()
+
+# Получим параметры из запроса
+form = cgi.FieldStorage()
+city = form.getvalue("city", "Moscow")  # Значение по умолчанию - Москва
+unit = form.getvalue("unit", "metric")   # Значение по умолчанию
+# API ключ для OpenWeatherMap
+api_key = "67791249cddfdb6e812849ce1cb34e4f"
+
+# Запрос к OpenWeatherMap API
+url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&units={unit>response = requests.get(url)={unit}&appid={api_key}"
+weather_data = response.json()
+
+# Формируем данные в виде словаря
+data = {
+    "city": city,
+    "temperature": weather_data['main']['temp'],
+    "description": weather_data['weather'][0]['description']
+}
+
+# Выводим результат в виде JSON
+print("Content-type: application/json\n")
+print(json.dumps(data))

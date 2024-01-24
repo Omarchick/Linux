@@ -1,0 +1,48 @@
+---
+- name: Configure Weather Web App
+  hosts: 95.26.86.237
+
+  tasks:
+    - name: Install Apache HTTP Server
+      apt:
+        name: apache2
+        state: present
+
+    - name: Enable mod_cgid
+      apache2_module:
+        state: present
+        name: cgid
+      notify:
+        - Restart Apache
+
+    - name: Create virtual host configuration
+      template:
+        src: templates/t02.sl.example.conf.j2
+        dest: /etc/apache2/sites-available/t02.sl.example.conf
+      notify:
+        - Restart Apache
+
+    - name: Create required directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: '0755'
+      loop:
+        - /var/www/t02.sl.example/html
+        - /var/www/t02.sl.example/cgi-bin
+
+    - name: Copy currentweather script
+      copy:
+        src: files/currentweather
+        dest: /var/www/t02.sl.example/cgi-bin/currentweather
+        owner: www-data
+        group: www-data
+        mode: '0755'
+
+  handlers:
+    - name: Restart Apache
+      service:
+        name: apache2
+        state: restarted
